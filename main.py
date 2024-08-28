@@ -1,11 +1,34 @@
-from fastapi import FastAPI
+from typing import Annotated
+
+from fastapi import FastAPI, Depends
+from pydantic import BaseModel
 
 app = FastAPI()
 
 
-@app.get("/home")
-async def get_home():
-    return "Hello world"
+class STaskCreate(BaseModel):
+    name: str
+    description: str | None = None
+
+
+class STask(STaskCreate):
+    id: int
+
+
+tasks = []
+
+
+@app.post("/tasks/")
+async def create_task(request: Annotated[STaskCreate, Depends()]):
+    tasks.append(request)
+    return {"ok": True}
+
+
+# http://127.0.0.1:8000/docs#/
+# @app.get("/tasks")
+# async def get_tasks():
+#     task = Task(name="Task 1", description="Task 1")
+#     return {"data": task}
 
 
 @app.get("/")
